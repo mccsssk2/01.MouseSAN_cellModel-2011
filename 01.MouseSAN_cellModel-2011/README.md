@@ -33,6 +33,7 @@ No installation required.
 
 A few outputs I have used the model are as follows:  
 * Kharche et al. Computing in Cardiology 2010;37:421−424.  
+* Kharche et al. https://journals.physiology.org/doi/full/10.1152/ajpheart.00143.2010?rfr_dat=cr_pub++0pubmed&url_ver=Z39.88-2003&rfr_id=ori%3Arid%3Acrossref.org
 * Doris et al. (https://www.hh.um.es/Abstracts/Vol_34/34_11/34_11_1255.htm)  
 * Kharche et al. (https://www.sciencedirect.com/science/article/pii/S2214854X22000024)  
 
