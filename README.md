@@ -31,6 +31,10 @@ No installation required.
 
 # Use.  
 
+Use as:
+gcc -o msan c_filename.c -lm
+./msan {potential arguments to the binary}
+
 A few outputs I have used the model are as follows:  
 * Kharche et al. Computing in Cardiology 2010;37:421−424.  
 * Doris et al. (https://www.hh.um.es/Abstracts/Vol_34/34_11/34_11_1255.htm)  
