@@ -61,10 +61,7 @@ updated for specific improvements.
 
 # Acknowledements.
 
-This project was generously funded by CANARIE Inc. Canada (April 2020 to March 2023). British Heart Foundation. Wellcome Trust. EPSRC. Exeter University internal funding. Western University internal funding.
-The principal investigator was XYZ. The co-investigators were: ABC, DEC, GHI.
-The employees were:
-We also thank the Kidney Unit in Lawson, London Ontario, Canada, for hosting this project.
+This project was generously funded by Wellcome Trust UK (2009-2011).  
 
 # Licence.
 
