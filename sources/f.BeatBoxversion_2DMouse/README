@@ -1,0 +1,9 @@
+The simulation script (bbs files),
+input geometry (bbg files), 
+initial conditions and output
+manipulator are provided.
+
+Use with the cardiac simulator:
+http://wiener.ex.ac.uk/~vadim/home/software/BeatBox/
+(or get the known working tar ball code from SRK
+that comes with first hand support).

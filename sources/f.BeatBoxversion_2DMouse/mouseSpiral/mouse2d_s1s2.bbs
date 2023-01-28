@@ -1,0 +1,83 @@
+/*
+Mouse ventricle S1-S2
+This program is a simplification of the 2D to see
+that the stimulation current actually works.
+We try a few S2's now.
+*/
+
+def str iext 45;
+
+def int neqn [iext];
+
+// Computation parameters
+def str V 0; def real Vmin  -85; def real Vmax  50;def real Vmid -50;
+def str f 14; def real fmin    0; def real fmax 1.0;def real fmid 0.5;
+def str oi 39; def real oimin 0; def real oimax 1.0;def real oimid 0.5;
+
+def int nx 300;
+def int ny 300;
+def int xstim 3*nx/4;
+def real Ampl 3*80.0;
+
+state xmax=nx+2 ymax=ny+2 zmax=1 vmax=[iext]+1;
+
+def real ht 1.0e-5;
+def real hx 0.1;
+def real D 0.1; 
+
+def real second_time 100;                   // wild guess for second stimulus, in ms 340 works for basal CRN
+def long second_time_t=second_time/ht;        // at which step to apply the stimulus
+def real is_second_time 0.0;                  // flag to be raised when it is the time to apply
+
+def real Period second_time+20;
+def real Duration 0.8;
+
+// Schedule parameters
+def long dt 1000;        // every given number of timesteps for frequent outputs
+def long onems 1.0/ht;  // timesteps in one ms
+def long twoms 2.0/ht;  // timesteps in two ms
+def long tenms 5.0/ht; // timesteps in ten ms
+
+// set up some output and stimulus parameters
+def real begin;
+def real often;
+def real every1ms;
+def real every2ms;
+def real every10ms;
+def real seldom;
+def real stim;
+def real end;
+def real T;
+
+k_func name=timing when=always nowhere=1 pgm={
+  T=t*ht;
+  begin    =eq(t,0);
+  often    =eq(mod(t,dt),0);
+  seldom   =eq(mod(t,200000),0);
+  stim     =lt(T,Duration);
+  is_second_time=eq(t,second_time_t);
+  end   =ge(T,(second_time+20));
+};
+
+// Stimulus and computation
+diff v0=[V] v1=[iext] D=D hx=hx;
+k_func when=stim x0=0 x1=xstim/2 y0=0 y1=ymax-1 pgm={u[iext]=u[iext]+stim*Ampl;};
+k_func when=is_second_time x0=0 x1=xmax-1 y0=1 y1=ymax/2 pgm={u[V]=Vmax;}; // half the sheet is stimulated with the voltage S2 stimulus.
+euler v0=[V] v1=neqn-1 ht=ht ode=mousevent rest=0 par={ht=ht; IV=@[iext];};
+
+// get a few samples from the sheet for a frequency analysis.
+def real voltage;
+def real voltage2;
+sample when=often x0=5 y0=2 z0=0 v0=0 result=voltage;
+sample when=often x0=xmax/2 y0=ymax/2 z0=0 v0=0 result=voltage2;
+k_print nowhere=1 when=often file=[0].samples append=0 valuesep="\t" list={T;stim;voltage; voltage2;};
+
+ppmout when=seldom file="ppm/[0]_%d.ppm" mode="w"
+   r=[V]  r0=Vmin  r1=Vmax 
+   g=[f]  g0=fmin  g1=fmax
+   b=[oi] b0=oimin b1=oimax
+;
+
+stop when=end;
+end;
+

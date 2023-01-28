@@ -1,0 +1,297 @@
+#
+# Sanjay. Jan 22 2008.
+# 2nd Try. do it channel by channel
+#
+# Initial conditions.
+v(0)=-66.0
+#
+#
+# Icat
+ddt(0)=0.0
+ft(0)=1.0
+#
+# ikr
+ikr_act(0)=0.0
+ikr_inact(0)=1.0
+# ito
+q(0)=0.0
+r(0)=0.0
+#
+# INa
+mttxr(0)=0.0
+httxr(0)=1.0
+jttxr(0)=1.0
+mttxs(0)=0.0
+httxs(0)=1.0
+jttxs(0)=1.0
+#
+# ical
+#
+fl12(0)=1.0
+dl12(0)=0.0
+fl13(0)=1.0
+dl13(0)=0.0
+#
+# ist
+dst(0)=0.0
+fst(0)=1.0
+#
+# Parameter values.
+#
+# gk1
+p gk1=0.0052006355
+p pump=0.0478
+p kmna=5.64
+p kmk=0.621
+#
+# INaCa parameters
+p knaca=0.0000027229
+p ynaca=0.5    
+p dnaca=0.0001
+#
+# iks
+p gks=0.0003445
+# ikr
+# p gkr=0.00552824
+p gkr=0.0
+# ist
+p gst=0.0017682610
+p eist=15.0
+#
+p gto=0.004905
+#
+p gh=5.0405e-3
+#
+# Sodium
+p gnattxr=0.4001523416
+p gnattxs=0.2521096524
+p enattxr=40.0
+p gsus=0.00006645504
+#
+# ical
+#
+p gcal12=0.0022
+p gcal13=0.0064
+p ecal=55.0
+#
+#
+# icat
+p gcat=0.0076424263
+p ecat=45.0
+#
+# background
+#
+p gbna=0.0000580
+p gbca=0.0000132
+p gbk=0.0000252
+#
+p RR=8.314472
+p TT=310.5
+p F=96.4846
+#
+# 25 pF is 0.025 nF
+p cm=0.025
+#
+#
+# Ion concentrations and reversal potentials
+p nao=140.0
+p nai=8.0         
+p cao=1.8
+p cai=0.000115001
+p ko=5.4
+p ki=143.72
+#
+# time loop starts here.
+#
+# time loop starts here.
+# algebriac formulas
+ena=(RR*TT/F)*log(nao/nai)
+eca=(RR*TT/(2*F))*log(cao/cai)
+ek=(RR*TT/F)*log(ko/ki)
+eks=((RR*TT)/F)*log((ko+0.12*nao)/(ki+0.12*nai))
+#
+#
+# *IK1**********************************************
+xk1inf=1.0/(1.0+exp(0.0896*(v-ek)))
+ik1=gk1*xk1inf*(ko/(ko+0.210))*(v-ek)
+#
+# *ICaL*********************************
+#
+#
+alpha_dl=-28.39*(v+35.0)/(exp(-(v+35.0)/2.5)-1.0)-84.9*v/(exp(-0.208*v)-1.0)
+beta_dl=11.43*(v-5.0)/(exp(0.4*(v-5.0))-1.0)
+tau_dl=2000.0/(alpha_dl+beta_dl)
+#
+alpha_fl =3.12*(v+28.0)/(exp((v+28.0)/4.0)-1.0)
+beta_fl=25.0/(1.0+exp(-(v+28.0)/4.0))
+tau_fl=1000.0/(alpha_fl +beta_fl)
+#  Cav 1.2
+dl12_inf=1.0/(1+exp(-(v+9.3)/5.149))
+fl12_inf=1.0/(1+exp((v+35.9)/4.717))
+#
+# Cav 1.3 
+dl13_inf=1.0/(1+exp(-(v+28.0)/6.637))
+fl13_inf=1.0/(1+exp((v+48.0)/5.219))
+#
+ical12=gcal12*(fl12*dl12+0.006/(1.0+exp(-(v+14.1)/6.0)))*(v-ecal)
+ical13=gcal13*(fl13*dl13+0.006/(1.0+exp(-(v+14.1)/6.0)))*(v-ecal)
+#
+#
+# Ih
+#
+y_inf=1.0/(1.0 + exp((v+106.7)/16.23))
+tau_y = 1.0/(exp(-(v+590.3)*0.01094)+ exp((v-85.1)/17.2))
+
+ihk= 0.5*gh*y*(v-ek)
+ihna=0.5*gh*y*(v-ena)
+ih=ihk+ihna
+#
+# ito
+#
+#
+q_inf=1.0/(1.0+exp((v+59.37)/13.1))
+tau_q=25.5+167.3/(1.0+(v+27.87)*(v + 27.87)/81.0)
+r_inf=1.0/(1.0+exp(-(v-10.93)/19.7))
+tau_r=2.98+15.59/(1.037*exp(0.09*(v+30.61))+0.369*exp(-0.12*(v+23.84)))
+ito=gto*q*r*(v-ek)
+#
+#
+# isus
+#
+isus=gsus*r*(v-ek)
+#
+# Ina
+#
+m3infttxr=1.0/(1.0+exp(-(v+44.431)/6.233))
+hinfttxr=1.0/(1.0+exp((v+60.7)/5.64))
+m3infttxs=1.0/(1.0+exp(-(v+32.1)/7.726))
+hinfttxs=1.0/(1.0+exp((v+55.19)/4.6))
+mxr=m3infttxr^0.333
+mxs=m3infttxs^0.333
+deltattxrm=10.0
+taum=0.6247/(0.8322166*exp(-(v+36.7+deltattxrm)/2.985)+0.6274*exp((v+45.01+deltattxrm)/12.195))+4.569e-2
+deltattxrh=-50.0
+tauh=0.4757/(1.0/(15600.0*exp((v-20.0+deltattxrh)/16.949))+1.0/(0.92+0.037*exp(-(v-20.0+deltattxrh)/11.494)))
+deltattxrj=-40.0
+tauj=0.4757/(1.0/(168000.0*exp((v-20.0+deltattxrj)/18.182))+1.0/(2.58+0.94*exp(-(v-20.0+deltattxrj)/15.873)))
+inattxr=gnattxr*mttxr*mttxr*mttxr*httxr*jttxr*(v-enattxr)
+inattxs=gnattxs*mttxs*mttxs*mttxs*httxs*jttxs*(v-ena)
+#
+#
+# Ist
+qa=1.0/(1.0+exp(-(v+57.0+10.0)/5.0))
+alphaqa=1.0/(0.15*exp(-(v)/11.0)+0.2*exp(-(v)/700.0))
+betaqa=1.0/(16.0*exp((v)/18.0)+15.0*exp((v)/50.0))
+tauqa=1.0/(alphaqa + betaqa)
+alphaqi=0.1504/(3100.0*exp((v+10.0)/13.0)+700.0*exp((v+10.0)/70.0))
+betaqi=0.1504/(95.0*exp(-(v+10.0)/10.0)+50.0*exp(-(v+10.0)/700.0))+0.000229/(1+exp(-(v+10.0)/5.0))
+qi=alphaqi/(alphaqi+betaqi)
+tauqi=1.0/(alphaqi+betaqi)
+ist=gst*dst*fst*(v-eist)
+#
+#
+# **ICaT Cav3.1*****************************************
+#
+tau_dt=1.0/(1.068*exp((v+26.3)/30.0)+1.068*exp(-(v+26.3)/30.0))
+dt_inf=1.0/(1.0+exp(-(v + 46.89)/4.88))
+tau_ft=1.0/(0.0153*exp(-(v+61.7)/83.3)+0.015*exp((v+61.7)/15.38))
+ft_inf=1.0/(1.0+exp((v+71.28)/3.897))
+icat = gcat*ft*ddt*(v-ecat)
+#
+#
+#***Ib**************************************************************
+#
+ibna=gbna*(v-ena)
+ibca=gbca*(v-eca)
+ibk=gbk*(v-ek)
+ib=ibna+ibca+ibk
+#
+#
+#*Inak******************************************
+inak=pump*((nai/(kmna+nai))^3.0)*((ko/(kmk+ko))^2.0)*1.6/(1.5+exp(-(v+60.0)/40.0))
+#***iNaCa***************************************
+inaca=knaca*((nai^3.0)*cao*exp(0.03743*v*ynaca)-(nao^3.0)*cai*exp(0.03743*v*(ynaca-1.0)))/(1.0+dnaca*((nai^3.0)*cao+(nao^3.0)*cai))
+#
+#
+# Ikr
+# *Ikr********************************************
+ikr_ai=1.0/(1.0+exp(-(v+22.39)/11.71))
+tau_ikract=0.52655/(0.0042*exp((v)/17.0)+0.00015*exp(-(v)/26.0))
+ikr_ii=1.0/(1.0+exp((v+18.6)/(2.9*10.1)))
+tau_ii=1.0/(0.1*exp((v)/54.645)+0.656*exp((v)/106.157))
+ikr=gkr*ikr_act*ikr_inact*(v-ek)
+#
+#
+# *IKs*********************************************************************
+iks_ai=1.0/(1.0+exp(-(v-17.92)/13.5))
+tau_iks=1000.0/(14.0/(1.0+exp(-(v-40.0)/9.0))+exp(-(v)/45.0))
+iks=gks*iks_act*iks_act*(v-eks)
+#
+#
+#
+itot=ih+isus+ito+inattxr+inattxs+ical12+ical13+ist+ib+inak+inaca+ikr+icat+ik1
+# itot=inattxs
+#
+# Auxillary vars for output
+aux Ical12=ical12
+aux Ical13=ical13
+# aux Ih=ih
+# aux Ito=ito
+# aux Cm=cm
+#
+#
+# ODEs in same sequence as the algebriac formulas
+#
+v'=-itot/cm
+#
+# ito
+#
+q'=(q_inf-q)/tau_q
+r'=(r_inf-r)/tau_r
+#
+# Ih
+y'=(y_inf-y)/tau_y
+#
+#
+# ina
+mttxr'=(mxr-mttxr)/taum
+httxr'=(hinfttxr-httxr)/tauh
+jttxr'=(hinfttxr-jttxr)/tauj
+mttxs'=(mxs-mttxs)/taum
+httxs'=(hinfttxs-httxs)/tauh
+jttxs'=(hinfttxs-jttxs)/tauj
+#
+# ical
+#
+dl12'=(dl12_inf-dl12)/tau_dl
+fl12'=(fl12_inf-fl12)/tau_fl
+#
+#
+dl13'=(dl13_inf-dl13)/tau_dl
+fl13'=(fl13_inf-fl13)/tau_fl
+#
+# ist
+dst'=(qa-dst)/tauqa
+fst'=(qi-fst)/tauqi
+#
+# ikr
+ikr_act'=(ikr_ai-ikr_act)/tau_ikract
+ikr_inact'=(ikr_ii-ikr_inact)/tau_ii
+#
+#
+# iks
+#
+iks_act'=(iks_ai-iks_act)/tau_iks
+#
+# icat
+#
+ddt'=(dt_inf-ddt)/tau_dt
+ft'=(ft_inf-ft)/tau_ft
+#
+# Numerical and plotting parameters for xpp:
+@ maxstor=10000000, meth=euler, toler=1e-6, atoler=1e-6
+@ xlo=0.0,xhi=5000,ylo=-80,yhi=20,total=5000,bounds=10000,dt=0.05,dtmin=10e-4,dtmax=0.05
+@ autoxmin=0,autoxmax=1.0,autoymin=-80,autoymax=40
+@ ntst=100,nmax=20000,npr=100,ds=0.001,dsmin=0.001,dsmax=0.01
+@ ncol=7,epsl=10e-6,parmin=0,parmax=1.0,epsu=10e-6,epss=10e-6
+done

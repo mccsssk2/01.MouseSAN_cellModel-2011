@@ -1,0 +1,103 @@
+/*
+Prepare the rec file for the 2D program
+*/
+
+def real ht 1.0e-5;
+def real hx 0.1;	// a.u.
+def real D 0.1; // units? CV?
+
+def real L  10.0;
+def int nx L/hx;
+
+// Dynamic variables and layer allocation
+def str V 0;   def real Vmin -85.0; def real Vmax 20.0; def real Vmid -20.0;
+def str oi 7; def real oimin -0.1; def real oimax 1.1; def real oimid  0.5;
+def int neqn 45;
+def str i neqn;
+
+// The computational grid
+state xmax=nx+2 ymax=1 zmax=1 vmax=[i]+1;
+
+// Schedule and display parameters
+def long dt 20;         // output period
+def real T;		// model time, time units
+
+def str inrec mousev0.rec;
+def real pacelength `wc mousev0.rec | awk '{print $1}'`;
+
+def real xout nx*3/4;   // the measuring electrode position
+def real Vout;		// recorded voltage value
+def real front;		// flag indicating that a front has just passed
+def real Tfront;	// when it happened, in time units
+def real Tlast 0;	// ..., last time
+def real Period;	// interval between such happenings
+def int count 0;	// count how many times a front has passed
+def int countmax 10;	// when to stop
+
+def real begin;
+def real often;
+def real end;
+def real paceout;
+
+k_func nowhere=1 pgm={
+  T     =t*ht;
+  begin =eq(t,0);
+  often =eq(mod(t,dt),0);
+};
+
+// This relies on mousevent0.rec being recorded at the same time step
+k_func name=phase when=always x0=1 x1=1 
+file=[inrec] pgm={phasep=(2*pi*t)/pacelength;u0=p0;};
+
+// Computations
+diff v0=[V] v1=[i] hx=hx D=D;
+euler name=ode1 v0=0 v1=neqn-1 ht=ht ode=mousevent rest=0 par={
+ht=ht;
+IV=@[i]};
+
+//***********
+// DOS graphics output
+/*
+def int stdattr 7*16+5;
+def int winwidth 600;
+def int winheight 200;
+def int col0 10;      def int col1 col0+winwidth;
+def int row0 30;      def int row1 row0+winheight;
+screen WINX=-10 WINY=10 XMAX=col1+10 YMAX=row1+10;
+clock when=often  color=0*16+15 row0=1 col0=1;
+k_clock when=often color=0*16+15 row0=1 col0=10 format="T=%.1f" code=T; 
+def str plotwin col0=col0 col1=col1 row0=row0 row1=row1 color=15*16+15 lines=1 linewidth=5 absmin=-1 absmax=nx+1;
+k_plot when=often [plotwin] clean=1
+  N=nx
+  ordmin=Vmin ordmax=Vmax pgm={
+  ord=u(abs,0,0,[V]);
+  col=LIGHTRED
+};
+k_plot when=often [plotwin] clean=0
+  N=nx
+  ordmin=oimin ordmax=oimax pgm={
+  ord=u(abs,0,0,[oi]);
+  col=LIGHTBLUE
+};
+
+update when=often;
+*/
+
+//*************
+// Other output
+sample x0=xout v0=[V] result=Vout;
+k_poincare nowhere=1 when=always sign=1 which=0 pgm={front=Vout-Vmid; Tfront=T};
+k_func when=front nowhere=1 pgm={
+  Period=Tfront-Tlast;
+  Tlast=Tfront;
+  count=count+1;
+  paceout=eq(count,countmax);
+  end=gt(count,countmax)
+} debug=stdout;
+
+// this is the important output
+record when=paceout file=[0].rec append=0 x0=xout x1=xout v0=0 v1=neqn-1;
+
+stop when=end;
+
+end;

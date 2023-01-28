@@ -1,0 +1,93 @@
+/*
+SK
+16 Oct 2012.
+0D record of mouse ventricle AP.
+*/
+
+// Some model parameters
+def real ms 1.0;        /* time unit of ms */
+def real umin -85; 
+def real umax 50.0;
+
+// Discretization
+def real ht 1.0e-5;
+
+// Dynamic variables and layer allocation
+def str V 0;   def real Vmin -90.0; def real Vmax 50.0; def real Vmid -40.0;
+def str oi 7; def real oimin  0.0; def real oimax 1.0; def real oimid  0.5;
+def int neqn 45;
+def str i neqn;
+
+// The computational grid
+state xmax=1 ymax=1 zmax=1 vmax=[i];
+
+// Schedule and display parameters
+def long dt 2.0*ms/ht;  // output period
+def long DT 10.0*ms/ht; // colouring period
+def real T;		// model time, time units
+
+def real Tst 0;		// time of the last stimulus
+def real Period;	// interval between those
+def int count 0;	// count stimuli
+def int countmax 16;	// how many is enough
+
+def real begin;
+def real once;
+def real often;
+def real paceout;
+def real end;
+
+k_func name=timing nowhere=1 pgm={
+  T     =t*ht;
+  once  =eq(t,1);
+  often =eq(mod(t,dt),0);
+};
+
+//*********************************
+// The feedback stimulation protocol
+
+// The dynamic variables as global k_variabls - initial values high not to trigger feedback
+def real V=inf;
+def real oi;
+def real I=0;
+
+// The resting state
+def real Vst=-82.0;
+// k_func when=once nowhere=1 pgm={Vst=V};
+
+// End of AP fixed at this value above the resting state
+def real dV 2.0;
+// Voltage threshold
+def real Stim 115.0;
+
+// Feed-back stimulation: push when close to the resting state
+k_func name=restTest nowhere=1 pgm={
+  I=lt(V,Vst+dV);
+};
+
+k_func nowhere=1 when=I pgm={
+  Period=T-Tst;
+  Tst=T;
+  count=count+1;
+  paceout=eq(count,countmax);
+  end=gt(count,countmax);
+} debug=stdout;
+
+
+// The computation
+// k_func name=mouseVentRec when=I pgm={u[V]=u[V]+I*Stim};
+k_func name=mouseVentRec when=I pgm={u[V]=50.0;};
+euler name=mousevent0 v0=0 v1=neqn-1 ht=ht ode=mousevent rest=10 par={
+ht=ht;
+};
+
+sample when=always v0=[V] result=V;
+sample when=always v0=[oi] result=oi;
+
+/************************************************************/
+
+/***********************************************************/
+record when=paceout file=mousev0.rec append=0 v0=0 v1=neqn-1;
+
+stop when=end;
+end;

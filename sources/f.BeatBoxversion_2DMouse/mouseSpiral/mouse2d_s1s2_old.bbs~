@@ -1,0 +1,99 @@
+/*
+Mouse ventricle S1-S2
+*/
+def real sstime [1];
+
+def str iext 45;
+
+def int neqn [iext];
+
+def int xstim 10; // this is the number of nodes that are stimuluated.
+
+// Computation parameters
+def str V 0; def real Vmin  -95; def real Vmax  60;def real Vmid -50;
+def str h 1; def real hmin    0; def real hmax 1.0;def real hmid 0.5;
+def str n 2; def real nmin    0; def real nmax 1.0;def real nmid 0.5;
+def str f 5; def real fmin    0; def real fmax 1.0;def real fmid 0.5;
+def str oi 14; def real oimin 0; def real oimax 1.0;def real oimid 0.5;
+
+def int nx 100;
+def int ny 100;
+
+state xmax=nx+2 ymax=ny+2 zmax=1 vmax=[iext]+1;
+
+def real ht 1.0e-5;
+def real hx 0.1;	// a.u.
+def real D 0.1; // units? CV?
+
+def real second_time [1];                   // wild guess for second stimulus, in ms 340 works for basal CRN
+def long second_time_t=second_time/ht;        // at which step to apply the stimulus
+def real is_second_time 0.0;                  // flag to be raised when it is the time to apply
+
+def int Nstim 1;
+def real Period 100.0;
+def real Duration 0.5;
+
+// Schedule parameters
+def long dt 100;        // every given number of timesteps for frequent outputs
+def long onems 1.0/ht;  // timesteps in one ms
+def long twoms 2.0/ht;  // timesteps in two ms
+def long tenms 5.0/ht; // timesteps in ten ms
+def long DT (Period*Nstim)/ht;	// ctlpoint period
+
+// set up some output and stimulus parameters
+
+def real begin;
+def real often;
+def real every1ms;
+def real every2ms;
+def real every10ms;
+def real seldom;
+def real stim;
+def real end;
+def real T;
+def real singz_run_time;
+
+k_func name=timing when=always nowhere=1 pgm={
+  T=t*ht;
+  begin    =eq(t,0);
+  often    =eq(mod(t,dt),0);
+  every1ms =eq(mod(t,onems),0);
+  every2ms =eq(mod(t,twoms),0);
+  every10ms=eq(mod(t,tenms),0);
+  seldom   =eq(mod(t,200),0);
+  stim     =(lt(mod(T,Period),Duration)*lt(T,Period*Nstim))*Ampl/Cm;
+  is_second_time=eq(t,second_time_t);
+  singz_run_time=gt(t,second_time_t);
+  end   =ge(T,(Period*Nstim+6000));
+};
+
+// Stimulus and computation
+diff v0=[V] v1=[iext] D=D hx=hx;
+k_func when=stim x0=0 x1=xstim y0=0 y1=ymax-1 pgm={u[iext]=u[iext]+stim;}; // wave going from bottom up/top down, stimulus is a current injection
+k_func when=is_second_time x0=0 x1=xmax-1 y0=1 y1=ymax/2 pgm={u[V]=Vmax;}; // half the sheet is stimulated with the voltage S2 stimulus.
+euler v0=[V] v1=neqn-1 ht=ht ode=mousevent rest=10 par={ht=ht; gk1=gk1; IV=@[iext];};
+
+ppmout when=every10ms file="ppm/[0]_%d.ppm" mode="w"
+   r=[V]  r0=Vmin  r1=Vmax 
+   g=[f]  g0=fmin  g1=fmax
+   b=[oi] b0=oimin b1=oimax
+;
+
+// get a few samples from the sheet for a frequency analysis.
+def real voltage;
+def real voltage2;
+def real voltage3;
+def real voltage4;
+sample when=often x0=1   y0=1   z0=0 v0=0 result=voltage;
+sample when=often x0=10  y0=10  z0=0 v0=0 result=voltage2;
+sample when=often x0=100 y0=124 z0=0 v0=0 result=voltage3;
+sample when=often x0=270 y0=272 z0=0 v0=0 result=voltage4;
+k_print nowhere=1 when=often file=[0].samples append=0 valuesep="\t" list={T;stim;voltage;voltage2;voltage3;voltage4};
+
+// get the tip trajectory of this spiral.
+
+singz when=every10ms v0=[V] c0=Vmid v1=[oi] c1=oimid hx=hx file=[0].trj;
+
+stop when=end;
+end;
+

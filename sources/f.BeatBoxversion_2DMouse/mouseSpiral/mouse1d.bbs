@@ -1,0 +1,88 @@
+/*
+Mouse ventricle S1-S2
+This program is a simplification of the 2D to see
+that the stimulation current actually works.
+*/
+
+def str iext 45;
+
+def int neqn [iext];
+
+def int xstim 5; // this is the number of nodes that are stimuluated. Apparently a BBX curiosity.
+
+// Computation parameters
+def str V 0; def real Vmin  -95; def real Vmax  60;def real Vmid -50;
+def str h 1; def real hmin    0; def real hmax 1.0;def real hmid 0.5;
+def str n 2; def real nmin    0; def real nmax 1.0;def real nmid 0.5;
+def str f 5; def real fmin    0; def real fmax 1.0;def real fmid 0.5;
+def str oi 14; def real oimin 0; def real oimax 1.0;def real oimid 0.5;
+
+def int nx 60;
+
+def real Ampl 80.0;
+
+state xmax=nx+2 ymax=1 zmax=1 vmax=[iext]+1;
+
+def real ht 1.0e-5;
+def real hx 0.1;	// a.u.
+def real D 0.1; // units? CV?
+
+def real second_time 2000;                   // wild guess for second stimulus, in ms 340 works for basal CRN
+def long second_time_t=second_time/ht;        // at which step to apply the stimulus
+def real is_second_time 0.0;                  // flag to be raised when it is the time to apply
+
+def int Nstim 1;
+def real Period 100.0;
+def real Duration 0.5;
+
+// Schedule parameters
+def long dt 10000;        // every given number of timesteps for frequent outputs
+def long onems 1.0/ht;  // timesteps in one ms
+def long twoms 2.0/ht;  // timesteps in two ms
+def long tenms 5.0/ht; // timesteps in ten ms
+def long DT (Period*Nstim)/ht;	// ctlpoint period
+
+// set up some output and stimulus parameters
+
+def real begin;
+def real often;
+def real every1ms;
+def real every2ms;
+def real every10ms;
+def real seldom;
+def real stim;
+def real end;
+def real T;
+def real singz_run_time;
+
+k_func name=timing when=always nowhere=1 pgm={
+  T=t*ht;
+  begin    =eq(t,0);
+  often    =eq(mod(t,dt),0);
+  every1ms =eq(mod(t,onems),0);
+  every2ms =eq(mod(t,twoms),0);
+  every10ms=eq(mod(t,tenms),0);
+  seldom   =eq(mod(t,200),0);
+  stim     =lt(mod(T,Period),Duration);
+  is_second_time=eq(t,second_time_t);
+  singz_run_time=gt(t,second_time_t);
+  end   =ge(T,(Period*Nstim+6000));
+};
+
+// Stimulus and computation
+diff v0=[V] v1=[iext] D=D hx=hx;
+k_func when=stim x0=0 x1=xstim pgm={u[iext]=u[iext]+stim*Ampl;}; // wave going from bottom up/top down, stimulus is a current injection
+euler v0=[V] v1=neqn-1 ht=ht ode=mousevent rest=10 par={ht=ht; IV=@[iext];};
+
+// get a few samples from the sheet for a frequency analysis.
+def real voltage;
+sample when=often x0=5 y0=0 z0=0 v0=0 result=voltage;
+k_print nowhere=1 when=often file=[0].samples append=0 valuesep="\t" list={T;stim;voltage;};
+
+/* Record "lines" of the 1D voltage distribution periodically to make a voltage-
+time plot. */
+record when=often x0=0 x1=xmax-1 v0=0 append=0 xsep=" " file=mouse1d.dat;
+
+stop when=end;
+end;
+
