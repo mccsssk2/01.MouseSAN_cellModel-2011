@@ -6,6 +6,9 @@ Mouse sinoatrial node cell model codes.
 This cardiomyocyte cell model was develop to assist collaboration with Manchester Medical School where 
 the mouse is a popular animal model. It is biophysically detailed, i.e. it provides a spectrum of ion channel
 species that regulate cell electrical activity. The AJP paper where the model was published is provided.
+This work gave rise to the cell model codes in multiple languages suitable for use by experimentalists.
+The model optimisation was based on a mutual information driven assessment of parameter-model output
+sensitivty analysis.
 
 # Sources and data description.  
 
