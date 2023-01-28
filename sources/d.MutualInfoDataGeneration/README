@@ -1,0 +1,12 @@
+SRK.
+Data for the sensitivity analysis was generated using
+this code. The simulations were performed on UoM
+Bull Itanium system around 2008-2010.
+The outputs were analysed using Manchester Inst.
+of Biosciences' MI codes that were proprietary at 
+the time.
+The MI codes handled continuous variables, as 
+opposed to the discrete variable codes that is now
+distributed.
+Manchester Maths MI code at:
+http://www.cs.man.ac.uk/~pococka4/MIToolbox.html
