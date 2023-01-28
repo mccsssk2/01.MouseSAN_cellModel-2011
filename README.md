@@ -7,13 +7,18 @@ This cardiomyocyte cell model was develop to assist collaboration with Mancheste
 the mouse is a popular animal model. It is biophysically detailed, i.e. it provides a spectrum of ion channel
 species that regulate cell electrical activity. The AJP paper where the model was published is provided.
 This work gave rise to the cell model codes in multiple languages suitable for use by experimentalists.
-The model optimisation was based on a mutual information driven assessment of parameter-model output
-sensitivty analysis.
+The model optimisation was based on a mutual information driven assessment of parameter-modeloutput
+sensitivty analysis (SA). The SA was performed using proprietary codes from Niklas Ludtke.  
+
+The outputs from this work are: 
+* Kharche et al (model paper). https://journals.physiology.org/doi/full/10.1152/ajpheart.00143.2010
+* Kharche et al. (SA LNCS). https://link.springer.com/chapter/10.1007/978-3-642-01932-6_40  
 
 # Sources and data description.  
 
-Three sources of the same model are provided (see sources). The model is solved using Euler method,
-higher order BDF formulae, and MATLAB's ode15s.
+Multiple sources of the model are provided (see sources directory). The model is solved using Euler method,
+higher order BDF formulae using Sundials library, and MATLAB's ode15s. In addition, code that
+uses XPPAUT (Bard Ermentrout) are also provided.
 
 # Dependencies.  
 
