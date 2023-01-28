@@ -20,7 +20,7 @@ The outputs from this work are:
 
 Multiple sources of the model are provided (see sources directory). The model is solved using Euler method,
 higher order BDF formulae using Sundials library, and MATLAB's ode15s. In addition, code that
-uses XPPAUT (Bard Ermentrout) are also provided. Finally, this model (Euler and BDF) is also 
+uses XPPAUT (Bard Ermentrout) are also provided. This model (Euler and BDF) is also 
 available in Exeter's cardiac simulator called BeatBox (see other repositories here).
 
 # Dependencies.  
