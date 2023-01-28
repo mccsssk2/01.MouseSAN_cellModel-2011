@@ -8,7 +8,9 @@ the mouse is a popular animal model. It is biophysically detailed, i.e. it provi
 species that regulate cell electrical activity. The AJP paper where the model was published is provided.
 This work gave rise to the cell model codes in multiple languages suitable for use by experimentalists.
 The model optimisation was based on a mutual information driven assessment of parameter-modeloutput
-sensitivty analysis (SA). The SA was performed using proprietary codes from Niklas Ludtke.  
+sensitivty analysis (SA). The SA was performed using proprietary codes from Niklas Ludtke. Further
+development and application of this and related models will find extensive nationwide (UK and Canada) and international
+application, for example in FDA required in silico drug testing and the UK NC3Rs activities.
 
 The outputs from this work are: 
 * Kharche et al (model paper). https://journals.physiology.org/doi/full/10.1152/ajpheart.00143.2010
