@@ -31,7 +31,10 @@ solvers using BDF formulae. To use this version, Sundials (https://computing.lln
 A suitably old version (around 2011) of Sundials should be used, but the latest versions may also work.  
 
 To use the MATLAB version, MATLAB 2016 or later should be used. The MATLAB code can be compiled
-using the compiler to improve performance to a certain extent.
+using the compiler to improve performance to a certain extent.  
+
+To use the XPP-AUTO version, especially for bifurcation analysis, the continuation software/solver called
+XPPAUT can be found easily on the internet.
 
 # Install.  
 
